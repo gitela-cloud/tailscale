@@ -239,7 +239,6 @@ func warnLogConfig() Config {
 	// fewer logs from raft
 	c.Raft.LogLevel = "WARN"
 	// timeouts long enough that we can form a cluster under -race
-	// TODO but if I set them to even longer then we have trouble with auth refresh: Get "http://local-tailscaled.sock/localapi/v0/status": context deadline exceeded
 	c.Raft.LeaderLeaseTimeout = 2 * time.Second
 	c.Raft.HeartbeatTimeout = 4 * time.Second
 	c.Raft.ElectionTimeout = 4 * time.Second
