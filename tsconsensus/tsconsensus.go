@@ -4,7 +4,7 @@
 // Package tsconsensus implements a consensus algorithm for a group of tsnet.Servers
 //
 // The Raft consensus algorithm relies on you implementing a state machine that will give the same
-// result to a give command as long as the same logs have been applied in the same order.
+// result to a given command as long as the same logs have been applied in the same order.
 //
 // tsconsensus uses the hashicorp/raft library to implement leader elections and log application.
 //
