@@ -3,7 +3,11 @@
 
 package qnap
 
-import "tailscale.com/release/dist"
+import (
+	"fmt"
+
+	"tailscale.com/release/dist"
+)
 
 // Targets defines the dist.Targets for QNAP devices.
 //
@@ -12,6 +16,7 @@ import "tailscale.com/release/dist"
 func Targets(privateKeyPath, certificatePath string) []dist.Target {
 	var signerInfo *signer
 	if privateKeyPath != "" && certificatePath != "" {
+		fmt.Printf("ZZZZ PrivateKeyPath: %s   CertificatePath: %s\n", privateKeyPath, certificatePath)
 		signerInfo = &signer{privateKeyPath, certificatePath}
 	}
 	return []dist.Target{
