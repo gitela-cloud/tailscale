@@ -41,9 +41,12 @@ const NonceLen = 24
 type MessageType byte
 
 const (
-	TypePing        = MessageType(0x01)
-	TypePong        = MessageType(0x02)
-	TypeCallMeMaybe = MessageType(0x03)
+	TypePing                     = MessageType(0x01)
+	TypePong                     = MessageType(0x02)
+	TypeCallMeMaybe              = MessageType(0x03)
+	TypeBindUDPEndpoint          = MessageType(0x04)
+	TypeBindUDPEndpointChallenge = MessageType(0x05)
+	TypeBindUDPEndpointAnswer    = MessageType(0x06)
 )
 
 const v0 = byte(0)
@@ -83,6 +86,12 @@ func Parse(p []byte) (Message, error) {
 		return parsePong(ver, p)
 	case TypeCallMeMaybe:
 		return parseCallMeMaybe(ver, p)
+	case TypeBindUDPEndpoint:
+		return parseBindUDPEndpoint(ver, p)
+	case TypeBindUDPEndpointChallenge:
+		return parseBindUDPEndpointChallenge(ver, p)
+	case TypeBindUDPEndpointAnswer:
+		return parseBindUDPEndpointAnswer(ver, p)
 	default:
 		return nil, fmt.Errorf("unknown message type 0x%02x", byte(t))
 	}
@@ -266,7 +275,71 @@ func MessageSummary(m Message) string {
 		return fmt.Sprintf("pong tx=%x", m.TxID[:6])
 	case *CallMeMaybe:
 		return "call-me-maybe"
+	case *BindUDPEndpoint:
+		return "bind-udp-endpoint"
+	case *BindUDPEndpointChallenge:
+		return "bind-udp-endpoint-challenge"
+	case *BindUDPEndpointAnswer:
+		return "bind-udp-endpoint-answer"
 	default:
 		return fmt.Sprintf("%#v", m)
 	}
+}
+
+type BindUDPEndpoint struct{}
+
+func (m *BindUDPEndpoint) AppendMarshal(b []byte) []byte {
+	ret, _ := appendMsgHeader(b, TypeBindUDPEndpoint, v0, 0)
+	return ret
+}
+
+func parseBindUDPEndpoint(ver uint8, p []byte) (m *BindUDPEndpoint, err error) {
+	m = new(BindUDPEndpoint)
+	return m, nil
+}
+
+// BindUDPEndpointChallengeLen is the length of a marshalled
+// BindUDPEndpointChallenge message, without the message header or padding.
+const BindUDPEndpointChallengeLen = 32
+
+type BindUDPEndpointChallenge struct {
+	Challenge [BindUDPEndpointChallengeLen]byte
+}
+
+func (m *BindUDPEndpointChallenge) AppendMarshal(b []byte) []byte {
+	ret, d := appendMsgHeader(b, TypeBindUDPEndpointChallenge, v0, BindUDPEndpointChallengeLen)
+	copy(d, m.Challenge[:])
+	return ret
+}
+
+func parseBindUDPEndpointChallenge(ver uint8, p []byte) (m *BindUDPEndpointChallenge, err error) {
+	if len(p) < BindUDPEndpointChallengeLen {
+		return nil, errShort
+	}
+	m = new(BindUDPEndpointChallenge)
+	copy(m.Challenge[:], p[:])
+	return m, nil
+}
+
+// BindUDPEndpointAnswerLen is the length of a marshalled
+// BindUDPEndpointAnswer message, without the message header or padding.
+const BindUDPEndpointAnswerLen = BindUDPEndpointChallengeLen
+
+type BindUDPEndpointAnswer struct {
+	Answer [BindUDPEndpointAnswerLen]byte
+}
+
+func (m *BindUDPEndpointAnswer) AppendMarshal(b []byte) []byte {
+	ret, d := appendMsgHeader(b, TypeBindUDPEndpointAnswer, v0, BindUDPEndpointAnswerLen)
+	copy(d, m.Answer[:])
+	return ret
+}
+
+func parseBindUDPEndpointAnswer(ver uint8, p []byte) (m *BindUDPEndpointAnswer, err error) {
+	if len(p) < BindUDPEndpointAnswerLen {
+		return nil, errShort
+	}
+	m = new(BindUDPEndpointAnswer)
+	copy(m.Answer[:], p[:])
+	return m, nil
 }
