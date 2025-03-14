@@ -271,7 +271,7 @@ func (e *serveEnv) runServeCombined(subcmd serveMode) execFunc {
 			return fmt.Errorf("error getting serve config: %w", err)
 		}
 
-		prefs, err := localClient.GetPrefs(ctx)
+		prefs, err := e.lc.GetPrefs(ctx)
 		if err != nil {
 			return fmt.Errorf("error getting prefs: %w", err)
 		}
