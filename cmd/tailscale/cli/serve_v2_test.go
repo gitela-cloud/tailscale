@@ -1032,59 +1032,59 @@ func TestValidateConfig(t *testing.T) {
 
 func TestSrcTypeFromFlags(t *testing.T) {
 	tests := []struct {
-		name         string
-		env          *serveEnv
-		expectedType serveType
-		expectedPort uint16
-		expectedErr  bool
-		explicitSet  bool
+		name               string
+		env                *serveEnv
+		expectedType       serveType
+		expectedPort       uint16
+		expectedErr        bool
+		expectedWasDefault bool
 	}{
 		{
-			name:         "only http set",
-			env:          &serveEnv{http: 80},
-			expectedType: serveTypeHTTP,
-			expectedPort: 80,
-			expectedErr:  false,
-			explicitSet:  true,
+			name:               "only http set",
+			env:                &serveEnv{http: 80},
+			expectedType:       serveTypeHTTP,
+			expectedPort:       80,
+			expectedErr:        false,
+			expectedWasDefault: false,
 		},
 		{
-			name:         "only https set",
-			env:          &serveEnv{https: 10000},
-			expectedType: serveTypeHTTPS,
-			expectedPort: 10000,
-			expectedErr:  false,
-			explicitSet:  true,
+			name:               "only https set",
+			env:                &serveEnv{https: 10000},
+			expectedType:       serveTypeHTTPS,
+			expectedPort:       10000,
+			expectedErr:        false,
+			expectedWasDefault: false,
 		},
 		{
-			name:         "only tcp set",
-			env:          &serveEnv{tcp: 8000},
-			expectedType: serveTypeTCP,
-			expectedPort: 8000,
-			expectedErr:  false,
-			explicitSet:  true,
+			name:               "only tcp set",
+			env:                &serveEnv{tcp: 8000},
+			expectedType:       serveTypeTCP,
+			expectedPort:       8000,
+			expectedErr:        false,
+			expectedWasDefault: false,
 		},
 		{
-			name:         "only tls-terminated-tcp set",
-			env:          &serveEnv{tlsTerminatedTCP: 8080},
-			expectedType: serveTypeTLSTerminatedTCP,
-			expectedPort: 8080,
-			expectedErr:  false,
-			explicitSet:  true,
+			name:               "only tls-terminated-tcp set",
+			env:                &serveEnv{tlsTerminatedTCP: 8080},
+			expectedType:       serveTypeTLSTerminatedTCP,
+			expectedPort:       8080,
+			expectedErr:        false,
+			expectedWasDefault: false,
 		},
 		{
-			name:         "defaults to https, port 443",
-			env:          &serveEnv{},
-			expectedType: serveTypeHTTPS,
-			expectedPort: 443,
-			expectedErr:  false,
-			explicitSet:  false,
+			name:               "defaults to https, port 443",
+			env:                &serveEnv{},
+			expectedType:       serveTypeHTTPS,
+			expectedPort:       443,
+			expectedErr:        false,
+			expectedWasDefault: true,
 		},
 		{
-			name:         "multiple types set",
-			env:          &serveEnv{http: 80, https: 443},
-			expectedPort: 0,
-			expectedErr:  true,
-			explicitSet:  true,
+			name:               "multiple types set",
+			env:                &serveEnv{http: 80, https: 443},
+			expectedPort:       0,
+			expectedErr:        true,
+			expectedWasDefault: false,
 		},
 	}
 
@@ -1100,8 +1100,8 @@ func TestSrcTypeFromFlags(t *testing.T) {
 			if srcPort != tt.expectedPort {
 				t.Errorf("Expected srcPort: %d, got: %d", tt.expectedPort, srcPort)
 			}
-			if explicitSet != tt.explicitSet {
-				t.Errorf("Expected explicitSet: %v, got: %v", tt.explicitSet, explicitSet)
+			if explicitSet != tt.expectedWasDefault {
+				t.Errorf("Expected defaultFlag: %v, got: %v", tt.expectedWasDefault, explicitSet)
 			}
 		})
 	}
